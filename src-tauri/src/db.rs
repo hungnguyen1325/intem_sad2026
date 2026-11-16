@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::sync::Mutex;
 
+include!(concat!(env!("OUT_DIR"), "/embedded_db.rs"));
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DbConfig {
     pub host: String,
@@ -72,15 +74,16 @@ fn find_config_file() -> Option<PathBuf> {
 }
 
 fn load_config() -> Result<DbConfig, String> {
+    // 1. Ưu tiên đọc file config ngoài nếu người dùng tự cấu hình
     if let Some(path) = find_config_file() {
-        let content = std::fs::read_to_string(&path)
-            .map_err(|e| format!("Không thể đọc file {}: {e}", path.display()))?;
-        let config: DbConfig = serde_json::from_str(&content)
-            .map_err(|e| format!("File cấu hình {} sai định dạng: {e}", path.display()))?;
-        return Ok(config);
+        if let Ok(content) = std::fs::read_to_string(&path) {
+            if let Ok(config) = serde_json::from_str::<DbConfig>(&content) {
+                return Ok(config);
+            }
+        }
     }
 
-    // Fallback: Biến môi trường
+    // 2. Kiểm tra biến môi trường hệ thống
     if let (Ok(host), Ok(user), Ok(pass), Ok(database)) = (
         std::env::var("DB_HOST"),
         std::env::var("DB_USER"),
@@ -102,7 +105,15 @@ fn load_config() -> Result<DbConfig, String> {
         });
     }
 
-    Err("Không tìm thấy file cấu hình 'db_config.json' (hoặc biến môi trường DB_*). Vui lòng tạo file db_config.json dựa trên db_config.example.json.".to_string())
+    // 3. Sử dụng cấu hình mặc định được nhúng an toàn trong binary lúc build
+    if !EMBEDDED_CONFIG.is_empty() {
+        let decrypted: Vec<u8> = EMBEDDED_CONFIG.iter().map(|b| b ^ XOR_KEY).collect();
+        if let Ok(config) = serde_json::from_slice::<DbConfig>(&decrypted) {
+            return Ok(config);
+        }
+    }
+
+    Err("Chưa cấu hình cơ sở dữ liệu. Vui lòng tạo file db_config.json dựa trên db_config.example.json.".to_string())
 }
 
 pub struct DbState {
