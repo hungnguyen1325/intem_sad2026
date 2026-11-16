@@ -92,7 +92,7 @@ export function LoginPage({
         />
         <p className="text-sm text-white/40">INTEM DESKTOP · 0.1</p>
       </section>
-      <section className="flex min-w-0 items-center justify-center p-6">
+      <section className="flex min-w-0 items-center justify-center overflow-y-auto p-6">
         <form onSubmit={submit} className="w-full max-w-sm">
           <p className="mb-3 text-sm font-semibold tracking-[.2em] text-brand">CHÀO MỪNG TRỞ LẠI</p>
           <h2 className="text-3xl font-semibold">Đăng nhập</h2>
