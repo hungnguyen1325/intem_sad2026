@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Be Vietnam Pro", "Segoe UI", sans-serif;
+  --color-ink: #172e2a;
+  --color-brand: #25614e;
+  --color-paper: #f5f6f2;
+  --animate-dialog-in: dialog-in 180ms ease-out;
+  --animate-popup-in: popup-in 140ms ease-out;
+  --animate-page-in: page-in 220ms ease-out;
+
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes popup-in {
+    from {
+      opacity: 0;
+      transform: scaleY(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+  }
+  @keyframes page-in {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  * {
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+  * {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  body {
+    margin: 0;
+    min-width: 0;
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
+  :focus-visible {
+    outline: 2px solid #25614e;
+    outline-offset: 2px;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    border-color: #6b947e;
+    box-shadow: 0 0 0 1px #6b947e;
+  }
+}
+
+/* Keep the login usable in small WebViews and at higher Windows display scales. */
+.login-layout {
+  height: 100%;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.app-viewport > div {
+  min-height: 100%;
+}
+.login-layout > section {
+  min-width: 0;
+}
+@media (max-width: 800px) {
+  .login-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .login-layout > .login-brand {
+    display: none;
+  }
+}
+@media (max-height: 650px) {
+  .login-layout > section {
+    padding: 24px;
+  }
+  .login-layout form > p {
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+  .login-layout h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Native WebView number controls. */
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

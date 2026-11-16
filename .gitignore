@@ -1,0 +1,108 @@
+# ==========================================
+# Rust & Tauri
+# ==========================================
+# Cargo build outputs and executables
+target/
+**/target/
+src-tauri/target/
+
+# Cargo backup files
+**/*.rs.bk
+
+# Tauri generated capability schemas
+src-tauri/gen/schemas/
+**/gen/schemas/
+
+# Tauri & WiX build artifacts
+*.wixpdb
+
+# ==========================================
+# Node.js & Frontend (Vite / React / TypeScript)
+# ==========================================
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.tsbuildinfo
+
+# Package manager logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Linting & build caches
+.eslintcache
+.stylelintcache
+
+# ==========================================
+# Application Config & Secrets
+# ==========================================
+db_config.json
+**/db_config.json
+!db_config.example.json
+settings.json
+**/settings.json
+*.secret.json
+.env
+.env.*
+!.env.example
+
+# ==========================================
+# Release & Installers (Large Binaries)
+# ==========================================
+release/
+*.exe
+*.msi
+*.zip
+*.rar
+*.7z
+*.tar.gz
+
+# ==========================================
+# IDEs & Code Editors
+# ==========================================
+# Visual Studio Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains / IntelliJ / RustRover / WebStorm
+.idea/
+*.iml
+
+# Visual Studio
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.user
+*.userosscache
+*.sln.docstates
+
+# ==========================================
+# Operating System Files
+# ==========================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig
