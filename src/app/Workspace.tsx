@@ -58,7 +58,7 @@ export function Workspace({ user, onLogout }: { user: AuthUser; onLogout: () => 
           </button>
         </div>
       </header>
-      <main className="mx-auto min-h-0 w-full max-w-6xl flex-1 overflow-y-auto p-4">
+      <main className="mx-auto min-h-0 w-full max-w-6xl flex-1 p-4">
         <DashboardPage addedItem={addedItem} />
       </main>
       {dialog === "products" && <AddProductDialog {...dialogProps} />}

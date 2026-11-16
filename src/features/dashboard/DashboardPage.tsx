@@ -275,7 +275,7 @@ export function DashboardPage({
   );
 
   return (
-    <section className="animate-page-in motion-reduce:animate-none flex min-h-full flex-col text-sm">
+    <section className="animate-page-in motion-reduce:animate-none flex h-full min-h-0 flex-col text-sm">
       {dataError && (
         <div
           className="mb-3 rounded-md border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800 [&_button]:ml-2 [&_button]:underline"
@@ -286,7 +286,7 @@ export function DashboardPage({
       )}
       <form ref={formElement} onSubmit={print} className="flex min-w-0 flex-1">
         <fieldset
-          className="flex min-w-0 flex-1 flex-col justify-start gap-4 rounded-xl border border-slate-200 bg-white p-5 disabled:opacity-60 [&>div+div]:border-t [&>div+div]:border-slate-100 [&>div+div]:pt-4"
+          className="flex min-w-0 flex-1 flex-col justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 disabled:opacity-60 [&>div+div]:border-t [&>div+div]:border-slate-100 [&>div+div]:pt-4"
           disabled={printDisabled}
         >
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
