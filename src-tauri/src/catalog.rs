@@ -100,14 +100,16 @@ pub async fn get_catalog(
 
             let data: Vec<SupplierRow> = rows
                 .into_iter()
-                .map(|(id, name, address, standard, is_status, kyhieu)| SupplierRow {
-                    id,
-                    name,
-                    address,
-                    standard,
-                    is_status,
-                    kyhieu,
-                })
+                .map(
+                    |(id, name, address, standard, is_status, kyhieu)| SupplierRow {
+                        id,
+                        name,
+                        address,
+                        standard,
+                        is_status,
+                        kyhieu,
+                    },
+                )
                 .collect();
 
             Ok(serde_json::to_value(data).unwrap_or(Value::Null))
@@ -128,10 +130,24 @@ pub async fn add_catalog_item(
 
     match kind.as_str() {
         "products" => {
-            let name = data.get("name").and_then(|v| v.as_str()).unwrap_or("").trim();
-            let unit = data.get("unit").and_then(|v| v.as_str()).unwrap_or("").trim();
-            let is_status = data.get("isStatus").and_then(|v| v.as_bool()).unwrap_or(true);
-            let latest_code = data.get("latestCode").and_then(|v| v.as_str()).map(|s| s.trim());
+            let name = data
+                .get("name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .trim();
+            let unit = data
+                .get("unit")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .trim();
+            let is_status = data
+                .get("isStatus")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(true);
+            let latest_code = data
+                .get("latestCode")
+                .and_then(|v| v.as_str())
+                .map(|s| s.trim());
 
             if name.is_empty() || unit.is_empty() {
                 return Err("Tên sản phẩm và đơn vị tính không được để trống.".into());
@@ -142,15 +158,32 @@ pub async fn add_catalog_item(
                 (name, unit, is_status, latest_code, user_id),
             ).await.map_err(|e| format!("Lỗi thêm sản phẩm: {e}"))?;
 
-            let id_row: Option<(i32,)> = conn.exec_first("SELECT LAST_INSERT_ID()", ()).await
+            let id_row: Option<(i32,)> = conn
+                .exec_first("SELECT LAST_INSERT_ID()", ())
+                .await
                 .map_err(|e| format!("Lỗi lấy ID sản phẩm: {e}"))?;
             Ok(id_row.map(|r| r.0).unwrap_or(0))
         }
         "ages" => {
-            let name = data.get("name").and_then(|v| v.as_str()).unwrap_or("").trim();
-            let price = data.get("price").and_then(|v| v.as_str()).unwrap_or("").trim();
-            let is_status = data.get("isStatus").and_then(|v| v.as_bool()).unwrap_or(true);
-            let category = data.get("category").and_then(|v| v.as_i64()).map(|c| c as i32).unwrap_or(2);
+            let name = data
+                .get("name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .trim();
+            let price = data
+                .get("price")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .trim();
+            let is_status = data
+                .get("isStatus")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(true);
+            let category = data
+                .get("category")
+                .and_then(|v| v.as_i64())
+                .map(|c| c as i32)
+                .unwrap_or(2);
 
             if name.is_empty() || price.is_empty() {
                 return Err("Tên tuổi vàng và giá không được để trống.".into());
@@ -161,16 +194,31 @@ pub async fn add_catalog_item(
                 (name, price, is_status, category, user_id),
             ).await.map_err(|e| format!("Lỗi thêm tuổi vàng: {e}"))?;
 
-            let id_row: Option<(i32,)> = conn.exec_first("SELECT LAST_INSERT_ID()", ()).await
+            let id_row: Option<(i32,)> = conn
+                .exec_first("SELECT LAST_INSERT_ID()", ())
+                .await
                 .map_err(|e| format!("Lỗi lấy ID tuổi vàng: {e}"))?;
             Ok(id_row.map(|r| r.0).unwrap_or(0))
         }
         "suppliers" => {
             let name = data.get("name").and_then(|v| v.as_str()).map(|s| s.trim());
-            let address = data.get("address").and_then(|v| v.as_str()).map(|s| s.trim());
-            let standard = data.get("standard").and_then(|v| v.as_str()).unwrap_or("").trim();
-            let is_status = data.get("isStatus").and_then(|v| v.as_bool()).unwrap_or(true);
-            let kyhieu = data.get("kyhieu").and_then(|v| v.as_str()).map(|s| s.trim());
+            let address = data
+                .get("address")
+                .and_then(|v| v.as_str())
+                .map(|s| s.trim());
+            let standard = data
+                .get("standard")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .trim();
+            let is_status = data
+                .get("isStatus")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(true);
+            let kyhieu = data
+                .get("kyhieu")
+                .and_then(|v| v.as_str())
+                .map(|s| s.trim());
 
             if standard.is_empty() {
                 return Err("Tiêu chuẩn nhà cung cấp không được để trống.".into());
@@ -181,7 +229,9 @@ pub async fn add_catalog_item(
                 (name, address, standard, is_status, kyhieu, user_id),
             ).await.map_err(|e| format!("Lỗi thêm nhà cung cấp: {e}"))?;
 
-            let id_row: Option<(i32,)> = conn.exec_first("SELECT LAST_INSERT_ID()", ()).await
+            let id_row: Option<(i32,)> = conn
+                .exec_first("SELECT LAST_INSERT_ID()", ())
+                .await
                 .map_err(|e| format!("Lỗi lấy ID nhà cung cấp: {e}"))?;
             Ok(id_row.map(|r| r.0).unwrap_or(0))
         }

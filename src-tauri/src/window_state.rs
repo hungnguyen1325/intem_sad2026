@@ -90,20 +90,14 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                     let log_size = phys_size.to_logical::<f64>(scale);
 
                     // Kiểm tra xem có phải kích thước lúc đang maximize (hoặc gần toàn màn hình) không
-                    let is_near_fullscreen = tracked
-                        .current_monitor()
-                        .ok()
-                        .flatten()
-                        .map_or(false, |m| {
+                    let is_near_fullscreen =
+                        tracked.current_monitor().ok().flatten().map_or(false, |m| {
                             let mon_log = m.size().to_logical::<f64>(scale);
                             log_size.width >= mon_log.width - 30.0
                                 && log_size.height >= mon_log.height - 50.0
                         });
 
-                    if !is_near_fullscreen
-                        && log_size.width >= 800.0
-                        && log_size.height >= 500.0
-                    {
+                    if !is_near_fullscreen && log_size.width >= 800.0 && log_size.height >= 500.0 {
                         state.width = log_size.width.round() as u32;
                         state.height = log_size.height.round() as u32;
                     }

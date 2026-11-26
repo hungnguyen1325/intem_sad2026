@@ -1,6 +1,6 @@
 use crate::db::{DbState, SessionState};
-use flate2::write::GzEncoder;
 use flate2::Compression;
+use flate2::write::GzEncoder;
 use mysql_async::prelude::*;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
@@ -149,21 +149,21 @@ pub async fn create_print_items(
         Option<String>,
     );
 
-    let row: Option<ContextRow> = conn.exec_first(
-        context_query,
-        (request.product_id, request.supplier_id, request.age_id, user_id),
-    ).await.map_err(|e| format!("Lỗi tải thông tin sản phẩm: {e}"))?;
+    let row: Option<ContextRow> = conn
+        .exec_first(
+            context_query,
+            (
+                request.product_id,
+                request.supplier_id,
+                request.age_id,
+                user_id,
+            ),
+        )
+        .await
+        .map_err(|e| format!("Lỗi tải thông tin sản phẩm: {e}"))?;
 
-    let (
-        prod_name,
-        supp_name,
-        supp_addr,
-        supp_standard,
-        supp_code,
-        gold_age,
-        shop_name,
-        shop_addr,
-    ) = row.ok_or_else(|| "Không tìm thấy dữ liệu danh mục tương ứng.".to_string())?;
+    let (prod_name, supp_name, supp_addr, supp_standard, supp_code, gold_age, shop_name, shop_addr) =
+        row.ok_or_else(|| "Không tìm thấy dữ liệu danh mục tương ứng.".to_string())?;
 
     let supp_name = supp_name.unwrap_or_default();
     let supp_addr = supp_addr.unwrap_or_default();
@@ -179,9 +179,15 @@ pub async fn create_print_items(
         None
     };
 
-    let total_gram = request.total_gram.unwrap_or_else(|| grams(request.total_weight));
-    let gold_gram = request.gold_gram.unwrap_or_else(|| grams(request.gold_weight));
-    let gem_gram = request.gem_gram.unwrap_or_else(|| grams(request.gem_weight));
+    let total_gram = request
+        .total_gram
+        .unwrap_or_else(|| grams(request.total_weight));
+    let gold_gram = request
+        .gold_gram
+        .unwrap_or_else(|| grams(request.gold_weight));
+    let gem_gram = request
+        .gem_gram
+        .unwrap_or_else(|| grams(request.gem_weight));
     let total_wage_gem = request.wage + request.gem_price;
 
     let mut result_items: Vec<ProductItemResponse> = Vec::with_capacity(request.quantity);
@@ -226,12 +232,16 @@ pub async fn create_print_items(
             append_id_to_code: append_id,
         };
 
-        let json_bytes = serde_json::to_vec(&stored)
-            .map_err(|e| format!("Lỗi mã hóa dữ liệu: {e}"))?;
+        let json_bytes =
+            serde_json::to_vec(&stored).map_err(|e| format!("Lỗi mã hóa dữ liệu: {e}"))?;
 
         let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
-        encoder.write_all(&json_bytes).map_err(|e| format!("Lỗi nén dữ liệu: {e}"))?;
-        let compressed = encoder.finish().map_err(|e| format!("Lỗi hoàn tất nén: {e}"))?;
+        encoder
+            .write_all(&json_bytes)
+            .map_err(|e| format!("Lỗi nén dữ liệu: {e}"))?;
+        let compressed = encoder
+            .finish()
+            .map_err(|e| format!("Lỗi hoàn tất nén: {e}"))?;
 
         use base64::Engine;
         let metadata_b64 = base64::engine::general_purpose::STANDARD.encode(&compressed);
@@ -251,10 +261,7 @@ pub async fn create_print_items(
             shop_addr
         );
 
-        let raw_payload = format!(
-            "{}{}{}:{}|{}",
-            legacy, MARKER, user_id, code, metadata_b64
-        );
+        let raw_payload = format!("{}{}{}:{}|{}", legacy, MARKER, user_id, code, metadata_b64);
 
         let content = base64::engine::general_purpose::STANDARD.encode(raw_payload.as_bytes());
 
@@ -263,7 +270,9 @@ pub async fn create_print_items(
             (&content,),
         ).await.map_err(|e| format!("Lỗi lưu chi tiết sản phẩm: {e}"))?;
 
-        let id_row: Option<(i32,)> = conn.exec_first("SELECT LAST_INSERT_ID()", ()).await
+        let id_row: Option<(i32,)> = conn
+            .exec_first("SELECT LAST_INSERT_ID()", ())
+            .await
             .map_err(|e| format!("Lỗi lấy ID bản ghi: {e}"))?;
         let row_id = id_row.map(|r| r.0).unwrap_or(0);
 
@@ -287,7 +296,10 @@ pub async fn create_print_items(
             request.supplier_id
         );
 
-        let qr_link = format!("https://inv.sad.vn/p?q={}&v={}{}", row_id, qr_values, final_code);
+        let qr_link = format!(
+            "https://inv.sad.vn/p?q={}&v={}{}",
+            row_id, qr_values, final_code
+        );
 
         let mut final_item = item_proto;
         final_item.id = row_id;
@@ -298,10 +310,12 @@ pub async fn create_print_items(
     }
 
     if !latest_code.is_empty() {
-        let _ = conn.exec_drop(
-            "UPDATE products SET latest_code = ? WHERE id = ? AND user_id = ?",
-            (latest_code, request.product_id, user_id),
-        ).await;
+        let _ = conn
+            .exec_drop(
+                "UPDATE products SET latest_code = ? WHERE id = ? AND user_id = ?",
+                (latest_code, request.product_id, user_id),
+            )
+            .await;
     }
 
     Ok(result_items)

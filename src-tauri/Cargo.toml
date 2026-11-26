@@ -34,7 +34,14 @@ chrono = { version = "0.4", features = ["serde"] }
 rand = "0.8"
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.61.2", features = ["Win32_Security_Credentials", "Win32_Foundation"] }
+windows-sys = { version = "0.61.2", features = [
+  "Win32_Security_Credentials",
+  "Win32_Foundation",
+  "Win32_Devices_Communication",
+  "Win32_Storage_FileSystem",
+  "Win32_System_IO",
+  "Win32_System_Registry",
+] }
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration

@@ -47,7 +47,13 @@ export function AddCatalogDialog({
       onSaved({ kind, id });
       toast.success("Đã thêm danh mục.");
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Không thể lưu danh mục.");
+      setError(
+        typeof cause === "string"
+          ? cause
+          : cause instanceof Error
+            ? cause.message
+            : "Không thể lưu danh mục.",
+      );
     } finally {
       savingRef.current = false;
       setSaving(false);

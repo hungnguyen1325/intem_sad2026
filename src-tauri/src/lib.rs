@@ -4,6 +4,7 @@ mod credentials;
 mod db;
 mod items;
 mod printing;
+mod scale;
 mod settings;
 mod window_state;
 use tauri::Manager;
@@ -21,6 +22,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(db::DbState::new())
         .manage(db::SessionState::new())
+        .manage(scale::ScaleState::new())
         .setup(window_state::setup)
         .invoke_handler(tauri::generate_handler![
             auth::login,
@@ -32,7 +34,14 @@ pub fn run() {
             printing::print_labels,
             credentials::save_login,
             credentials::read_login,
-            credentials::clear_login
+            credentials::clear_login,
+            scale::list_scale_ports,
+            scale::get_scale_config,
+            scale::save_scale_config,
+            scale::set_scale_multiplier,
+            scale::start_scale,
+            scale::stop_scale,
+            scale::get_scale_status
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

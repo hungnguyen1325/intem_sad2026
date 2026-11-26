@@ -29,7 +29,8 @@ pub async fn login(
         .await
         .map_err(|e| format!("Lỗi truy vấn tài khoản: {e}"))?;
 
-    let (user_id, db_password, expired) = row.ok_or_else(|| "Tài khoản hoặc mật khẩu không chính xác.".to_string())?;
+    let (user_id, db_password, expired) =
+        row.ok_or_else(|| "Tài khoản hoặc mật khẩu không chính xác.".to_string())?;
 
     let input_hash = format!("{:x}", md5::compute(password.as_bytes()));
     if input_hash.to_lowercase() != db_password.to_lowercase() {

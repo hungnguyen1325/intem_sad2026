@@ -1,9 +1,10 @@
-import { Printer } from "lucide-react";
+import { Printer, Scale } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useToast } from "../../shared/toast/useToast";
 import type { AddedCatalogItem } from "../catalog/components/AddCatalogDialog";
 import { AppSelect } from "../../shared/AppSelect";
+import { formatScaleWeight } from "../scale/scale";
 import {
   emptyForm,
   inspectPrinting,
@@ -17,6 +18,8 @@ import {
   type PrintEnvironment,
   type PrintForm,
 } from "./printing";
+
+export type ScaleWeightUpdate = { weight: number; seq: number };
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
@@ -32,8 +35,14 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
 }
 export function DashboardPage({
   addedItem,
+  scaleUpdate,
+  scaleConnected,
+  scaleReadingWeight,
 }: {
   addedItem?: AddedCatalogItem;
+  scaleUpdate?: ScaleWeightUpdate;
+  scaleConnected?: boolean;
+  scaleReadingWeight?: number;
 }) {
   const toast = useToast();
   const [form, setForm] = useState<PrintForm>(emptyForm);
@@ -54,6 +63,8 @@ export function DashboardPage({
   const formElement = useRef<HTMLFormElement>(null);
   const inFlight = useRef(false);
   const appliedAddedItem = useRef<AddedCatalogItem | undefined>(undefined);
+  const appliedScaleSeq = useRef(0);
+  const [scalePulse, setScalePulse] = useState(false);
   const product = catalogs.products.find((x) => String(x.id) === form.productId);
   const supplier = catalogs.suppliers.find((x) => String(x.id) === form.supplierId);
   const age = catalogs.ages.find((x) => String(x.id) === form.ageId);
@@ -144,6 +155,29 @@ export function DashboardPage({
     window.addEventListener("keydown", shortcut);
     return () => window.removeEventListener("keydown", shortcut);
   }, []);
+
+  function applyWeightFromScale(weight: number) {
+    const formatted = formatScaleWeight(weight);
+    setForm((current) => {
+      const next = { ...current, totalWeight: formatted };
+      const total = numeric(next.totalWeight);
+      next.goldWeight = String(Math.max(0, +(total - numeric(next.gemWeight)).toFixed(5)));
+      return next;
+    });
+    setScalePulse(true);
+  }
+
+  useEffect(() => {
+    if (!scalePulse) return;
+    const timer = window.setTimeout(() => setScalePulse(false), 600);
+    return () => window.clearTimeout(timer);
+  }, [scalePulse]);
+
+  useEffect(() => {
+    if (!scaleUpdate || scaleUpdate.seq === appliedScaleSeq.current) return;
+    appliedScaleSeq.current = scaleUpdate.seq;
+    applyWeightFromScale(scaleUpdate.weight);
+  }, [scaleUpdate]);
 
   function update(key: keyof PrintForm, value: string) {
     if (key.includes("Weight")) {
@@ -319,7 +353,37 @@ export function DashboardPage({
               label="Trọng lượng tổng"
               hint={`${toGram(numeric(form.totalWeight)).toFixed(2)} g`}
             >
-              {input("totalWeight", "0.0000", "chỉ")}
+              <div
+                className={`relative [&_input]:tabular-nums [&>span]:pointer-events-none [&>span]:absolute [&>span]:top-1/2 [&>span]:-translate-y-1/2 [&>span]:text-sm [&>span]:text-slate-400 ${
+                  scaleConnected
+                    ? "[&_input]:pr-16 [&>span]:right-9"
+                    : "[&_input]:pr-10 [&>span]:right-3"
+                } ${scalePulse ? "[&_input]:border-emerald-400 [&_input]:bg-emerald-50/60" : ""}`}
+              >
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  maxLength={20}
+                  value={form.totalWeight}
+                  placeholder="0.0000"
+                  onChange={(e) => update("totalWeight", e.target.value)}
+                />
+                <span>chỉ</span>
+                {scaleConnected && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      scaleReadingWeight !== undefined && applyWeightFromScale(scaleReadingWeight)
+                    }
+                    disabled={scaleReadingWeight === undefined}
+                    title="Lấy trọng lượng hiện tại từ cân"
+                    aria-label="Lấy trọng lượng hiện tại từ cân"
+                    className="absolute right-1.5 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded text-brand hover:bg-brand/10 disabled:opacity-40"
+                  >
+                    <Scale size={14} aria-hidden="true" />
+                  </button>
+                )}
+              </div>
             </Field>
             <Field
               label="Trọng lượng vàng"

@@ -14,10 +14,35 @@ pub struct WindowState {
     pub maximized: bool,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScaleConfig {
+    pub port_name: String,
+    pub baud_rate: u32,
+    pub data_bits: u8,
+    pub parity: String,
+    pub stop_bits: String,
+    pub multiplier: f64,
+}
+
+impl Default for ScaleConfig {
+    fn default() -> Self {
+        Self {
+            port_name: String::new(),
+            baud_rate: 4800,
+            data_bits: 8,
+            parity: "None".to_string(),
+            stop_bits: "One".to_string(),
+            multiplier: 1.0,
+        }
+    }
+}
+
 #[derive(Default, Serialize, Deserialize)]
 pub struct Settings {
     pub login: Option<SavedLogin>,
     pub window: Option<WindowState>,
+    pub scale: Option<ScaleConfig>,
 }
 
 static FILE_LOCK: Mutex<()> = Mutex::new(());

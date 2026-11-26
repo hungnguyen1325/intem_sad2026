@@ -21,7 +21,13 @@ export function CatalogPage({ catalog }: { catalog: Catalog }) {
       })
       .catch((cause) => {
         if (!cancelled)
-          setError(cause instanceof Error ? cause.message : "Không thể tải dữ liệu.");
+          setError(
+            typeof cause === "string"
+              ? cause
+              : cause instanceof Error
+                ? cause.message
+                : "Không thể tải dữ liệu.",
+          );
       })
       .finally(() => {
         if (!cancelled) setBusy(false);
